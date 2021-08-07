@@ -20,5 +20,6 @@ from endpoint import api_root
 urlpatterns = [
     # path('admin/', admin.site.urls),
     path('', api_root),
-    path('api/menu/', include('menu.urls'))
+    path('api/menu/', include('menu.urls')),
+    path('api/order/', include('order.urls'))
 ]
