@@ -1,7 +1,7 @@
 from typing import Union
 from app.common.response import (
     Success, Created, SuccessNoContent,
-    BadRequest, NotFound, 
+    NotFound, 
     InternalServerError
 )
 from app.common.cache import get_cache, set_cache, delete_cache
@@ -22,7 +22,7 @@ def get_all_order()->Union[Success, InternalServerError]:
     except Exception as e:
         return InternalServerError(str(e))
 
-def create_order(serializer:OrderSerializers)->Union[Created, BadRequest]:
+def create_order(serializer:OrderSerializers)->Union[Created, InternalServerError]:
 
     try:
         data = serializer.data
