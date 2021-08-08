@@ -68,6 +68,23 @@ def update_menu(id:int, serializer:MenuSerializers)->Union[Success, NotFound, In
     except Exception as e:
         return InternalServerError(str(e))
 
+def patch_menu(id:int, input_data:dict)->Union[Success, NotFound, InternalServerError]:
+    try:
+        data = Menu.objects.get(pk=id)
+        if 'name' in input_data.keys():
+            data.name = input_data['name']
+        if 'price' in input_data.keys():
+            data.price = input_data['price']
+        data.save()
+
+        serializer = MenuSerializers(instance=data)
+        delete_cache([f'menu_{id}', 'menu_all'])
+        return Success(serializer.data)
+    except Menu.DoesNotExist:
+        return NotFound()
+    except Exception as e:
+        return InternalServerError(str(e))
+
 def delete_menu(id:int)->Union[SuccessNoContent, NotFound, InternalServerError]:
     try:
         data = Menu.objects.get(pk=id)
