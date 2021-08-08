@@ -1,9 +1,16 @@
-from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import generics
 from order.serializers import OrderSerializers
 from order.models import Order
+from order.services import ( 
+    get_all_order,
+    create_order,
+    get_order,
+    update_order,
+    delete_order
+)
+from app.common.response import common_response
 
 class OrderList(generics.GenericAPIView):
 
@@ -11,33 +18,29 @@ class OrderList(generics.GenericAPIView):
     serializer_class = OrderSerializers
 
     def get(self, request, format=None):
-        menus = Order.objects.all()
-        serializer = OrderSerializers(instance=menus, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        data = get_all_order()
+        return common_response(data)
 
     def post(self, request, format=None):
-        input_data = OrderSerializers(data=request.data)
-        input_data.is_valid(raise_exception=True)
-        input_data.save()
-        return Response(input_data.data, status=status.HTTP_201_CREATED)
+        serializer = OrderSerializers(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        output_data = create_order(serializer=serializer)
+        return common_response(output_data)
 
 class OrderDetail(generics.GenericAPIView):
 
     serializer_class = OrderSerializers
 
     def get(self, request, pk=None, format=None):
-        menu = get_object_or_404(Order, pk=pk)
-        serializer = OrderSerializers(menu)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        output_data = get_order(id=pk)
+        return common_response(output_data)
 
     def put(self, request, pk=None, format=None):
-        menu = get_object_or_404(Order, pk=pk)
-        serializer = OrderSerializers(instance=menu, data=request.data)
+        serializer = OrderSerializers(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        output_data = update_order(id=pk, serializer=serializer)
+        return common_response(output_data)
 
     def delete(self, request, pk=None, format=None):
-        menu = get_object_or_404(Order, pk=pk)
-        menu.delete()
-        return Response('', status=status.HTTP_204_NO_CONTENT)
+        output_data = delete_order(id=pk)
+        return common_response(output_data)
