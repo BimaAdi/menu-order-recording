@@ -1,4 +1,5 @@
 from typing import Union
+from django.db import transaction
 from app.common.response import (
     Success, Created, SuccessNoContent,
     NotFound, 
@@ -26,11 +27,12 @@ def create_order(serializer:OrderSerializers)->Union[Created, InternalServerErro
 
     try:
         data = serializer.data
-        new_order = Order.objects.create(
-            table_number=data['table_number']
-        )
-        for item in data['order_menus']:
-            OrderMenu.objects.create(order=new_order, **item)
+        with transaction.atomic():
+            new_order = Order.objects.create(
+                table_number=data['table_number']
+            )
+            for item in data['order_menus']:
+                OrderMenu.objects.create(order=new_order, **item)
 
         delete_cache(['order_*'])
     except Exception as e:
@@ -58,13 +60,14 @@ def get_order(id:int)->Union[Success, NotFound, InternalServerError]:
 def update_order(id:int, serializer:OrderSerializers)->Union[Success, NotFound, InternalServerError]:
     try:
         input_data = serializer.data
-        data = Order.objects.get(pk=id)
-        data.table_number = input_data['table_number']
-        data.save()
-        
-        data.order_menus.all().delete()
-        for item in input_data['order_menus']:
-            OrderMenu.objects.create(order=data, **item)
+        with transaction.atomic():
+            data = Order.objects.get(pk=id)
+            data.table_number = input_data['table_number']
+            data.save()
+            
+            data.order_menus.all().delete()
+            for item in input_data['order_menus']:
+                OrderMenu.objects.create(order=data, **item)
 
         serializer = OrderSerializers(instance=data)
         delete_cache([f'order_{id}', 'order_all'])
