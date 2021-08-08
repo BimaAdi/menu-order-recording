@@ -8,6 +8,7 @@ from order.services import (
     create_order,
     get_order,
     update_order,
+    patch_order,
     delete_order
 )
 from app.common.response import common_response
@@ -39,6 +40,12 @@ class OrderDetail(generics.GenericAPIView):
         serializer = OrderSerializers(data=request.data)
         serializer.is_valid(raise_exception=True)
         output_data = update_order(id=pk, serializer=serializer)
+        return common_response(output_data)
+
+    def patch(self, request, pk=None, format=None):
+        serializer = OrderSerializers(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        output_data = patch_order(id=pk, input_data=request.data)
         return common_response(output_data)
 
     def delete(self, request, pk=None, format=None):

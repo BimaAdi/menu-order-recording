@@ -17,6 +17,7 @@ Web aplikasi/API untuk mencatat pesanan di restoran.
 1. aktivasi virtual environtment `source env/bin/activate`
 1. Install depedency `pip install -r requirements.txt`
 1. Copy dan rename app/settings.py.example menjadi app/settings.py lalu isi settings.py berdasarkan konfigurasi postgresql dan redis yang digunakan
+1. Migrasi database `python manage.py migrate`
 1. jalankan aplikasi `python manage.py runserver {port}`
 
 ## StrukturAplikasi

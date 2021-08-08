@@ -9,6 +9,7 @@ from menu.services import (
     create_menu,
     get_menu,
     update_menu,
+    patch_menu,
     delete_menu
 )
 from app.common.response import common_response
@@ -49,6 +50,12 @@ class MenuDetail(generics.GenericAPIView):
         serializer = MenuSerializers(data=request.data)
         serializer.is_valid(raise_exception=True)
         output_data = update_menu(id=pk, serializer=serializer)
+        return common_response(output_data)
+
+    def patch(self, request, pk=None, format=None):
+        serializer = MenuSerializers(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        output_data = patch_menu(id=pk, input_data=request.data)
         return common_response(output_data)
 
     def delete(self, request, pk=None, format=None):

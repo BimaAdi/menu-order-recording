@@ -76,6 +76,27 @@ def update_order(id:int, serializer:OrderSerializers)->Union[Success, NotFound, 
         return NotFound()
     except Exception as e:
         return InternalServerError(str(e))
+
+def patch_order(id:int, input_data:dict)->Union[Success, NotFound, InternalServerError]:
+    try:
+        with transaction.atomic():
+            data = Order.objects.get(pk=id)
+            if 'table_number' in input_data.keys():
+                data.table_number = input_data['table_number']
+            data.save()
+            
+            if 'order_menus' in input_data.keys():
+                data.order_menus.all().delete()
+                for item in input_data['order_menus']:
+                    OrderMenu.objects.create(order=data, **item)
+
+        serializer = OrderSerializers(instance=data)
+        delete_cache([f'order_{id}', 'order_all'])
+        return Success(serializer.data)
+    except Order.DoesNotExist:
+        return NotFound()
+    except Exception as e:
+        return InternalServerError(str(e))
     
 def delete_order(id:int)->Union[SuccessNoContent, NotFound, InternalServerError]:
     try:
